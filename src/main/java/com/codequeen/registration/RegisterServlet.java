@@ -24,10 +24,11 @@ import java.util.Date;
 )
 public class RegisterServlet extends HttpServlet {
 
-    // Replace with your MongoDB Atlas connection string
-    // Best practice is to load this from an environment variable:
-    // System.getenv("MONGODB_URI")
-    private static final String MONGODB_URI = "mongodb+srv://<username>:<password>@cluster0.mongodb.net/?retryWrites=true&w=majority";
+    // Reads MONGODB_URI from environment variable (set this on Render).
+    // Falls back to hardcoded value for local development.
+    private static final String MONGODB_URI = System.getenv("MONGODB_URI") != null
+            ? System.getenv("MONGODB_URI")
+            : "mongodb+srv://variandn04_db_user:dncodequeen@register.usfthdf.mongodb.net/?appName=register";
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
