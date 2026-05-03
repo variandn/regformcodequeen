@@ -5,7 +5,7 @@ A modern, responsive, and aesthetically pleasing registration form built with HT
 ## Features Included
 - **Real-Time Validation**: Instant feedback for all form fields with clear error styling.
 - **Password Strength Indicator**: Dynamic visual progress bar indicating password complexity.
-- **Glassmorphism & Gradient Aesthetics**: Modern premium design optimized for all screen sizes.
+- ** Gradient Aesthetics**: Modern premium design optimized for all screen sizes.
 - **Form Fields Handled**: Name, Email, Password, Confirm Password, Mobile (Pattern validated), Language Dropdown, File Upload with extension limits, Gender Radios, and Terms of Use Checkbox.
 - **Interactive UI**: Micro-animations on submit, hover states, shake animation for invalid submissions, and spinner during processing.
 - **Java Servlet Backend**: A sample servlet ready to handle the multipart form-data submission and echo back the results in a success page.
