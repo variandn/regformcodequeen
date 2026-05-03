@@ -14,7 +14,7 @@ A modern, responsive, and aesthetically pleasing registration form built with HT
 ![Registration Form Demo](images/demo.png)
 
 ## Tech Stack
-- Frontend: HTML5, CSS3 (Vanilla), JavaScript (Vanilla)
+- Frontend: HTML5, CSS3, JavaScript
 - Backend: Java Servlets (Java EE), Maven
 
 ## Steps to Run the Project
@@ -42,47 +42,16 @@ A modern, responsive, and aesthetically pleasing registration form built with HT
 
 ## Database Configuration
 
-This application connects to a **MongoDB Atlas** cluster to save user registration data.
+This application connects to a **MongoDB Atlas** cluster to save user registration data. 
 
-The `MONGODB_URI` is read from an **environment variable** at runtime. If the variable is not set, it falls back to the hardcoded default in `RegisterServlet.java`.
-
-- **Local development**: Set the `MONGODB_URI` environment variable on your machine, or edit the fallback value in `RegisterServlet.java`.
-- **Render / Production**: Set `MONGODB_URI` as an environment variable in your Render dashboard (see below).
-
-The backend will automatically create a database named `registrationDB` and a collection named `users`.
-
-## Deploy to Render
-
-This project includes a `Dockerfile` for one-click deployment to [Render](https://render.com).
-
-### Steps
-
-1. **Push your code to GitHub:**
-   ```bash
-   git add .
-   git commit -m "Add Dockerfile for Render deployment"
-   git push origin main
+To configure your database:
+1. Open `src/main/java/com/codequeen/registration/RegisterServlet.java`.
+2. Locate the `MONGODB_URI` constant:
+   ```java
+   private static final String MONGODB_URI = "mongodb+srv://<username>:<password>@cluster0.mongodb.net/?retryWrites=true&w=majority";
    ```
-
-2. **Create a new Web Service on Render:**
-   - Go to [dashboard.render.com](https://dashboard.render.com) → **New** → **Web Service**
-   - Connect your GitHub repository
-   - Render will automatically detect the `Dockerfile`
-
-3. **Set environment variables:**
-   - In the Render service settings, go to **Environment** → **Add Environment Variable**
-   - Add:
-     | Key | Value |
-     |-----|-------|
-     | `MONGODB_URI` | `mongodb+srv://<user>:<pass>@cluster.mongodb.net/?appName=register` |
-
-4. **Deploy!**
-   - Click **Create Web Service** — Render will build the Docker image and start your Tomcat server
-   - Your form will be available at `https://your-service-name.onrender.com/`
-
-### Important Notes
-- Make sure your **MongoDB Atlas Network Access** allows connections from `0.0.0.0/0` (or Render's IP ranges)
-- Render automatically sets the `PORT` environment variable; the Dockerfile is pre-configured to use it
+3. Replace the placeholder URI with your actual MongoDB Atlas connection string.
+4. The backend will automatically create a database named `registrationDB` and a collection named `users` to store the submitted data.
 
 ## Submission to GitHub
 

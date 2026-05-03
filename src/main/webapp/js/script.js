@@ -1,258 +1,193 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('registrationForm');
-    
-    // Inputs
-    const nameInput = document.getElementById('name');
-    const emailInput = document.getElementById('email');
-    const passwordInput = document.getElementById('password');
-    const confirmPasswordInput = document.getElementById('confirmPassword');
-    const mobileInput = document.getElementById('mobile');
-    const languageInput = document.getElementById('language');
-    const genderInputs = document.querySelectorAll('input[name="gender"]');
-    const attachmentInput = document.getElementById('attachment');
-    const termsInput = document.getElementById('terms');
-    
-    // Password Strength UI
-    const strengthBar = document.getElementById('strengthBar');
-    const strengthText = document.getElementById('strengthText');
-    const fileNameDisplay = document.getElementById('fileName');
+(function () {
+  /* ---- Utility ---- */
+  const $ = id => document.getElementById(id);
+  const show = (el, msg) => { el.textContent = msg || el.textContent; el.classList.add('show'); };
+  const hide = el => el.classList.remove('show');
+  const setValid = el => { el.classList.remove('invalid'); el.classList.add('valid'); };
+  const setInvalid = el => { el.classList.remove('valid'); el.classList.add('invalid'); };
+  const clearState = el => { el.classList.remove('valid', 'invalid'); };
 
-    // Validation Regex Patterns
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phonePattern = /^\+?[\d\s\-\(\)]{10,15}$/; // Supports formats like +1 555-555-5555 or 1234567890
-
-    // File input change handler
-    attachmentInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            fileNameDisplay.textContent = file.name;
-            const fileExt = file.name.split('.').pop().toLowerCase();
-            const allowedExts = ['jpg', 'jpeg', 'png', 'pdf', 'zip'];
-            
-            if (allowedExts.includes(fileExt)) {
-                e.target.closest('.file-label').classList.add('has-file');
-                validateField(attachmentInput, true, 'attachmentError');
-            } else {
-                e.target.closest('.file-label').classList.remove('has-file');
-                validateField(attachmentInput, false, 'attachmentError');
-            }
-        } else {
-            fileNameDisplay.textContent = 'Choose a file...';
-            e.target.closest('.file-label').classList.remove('has-file');
-            validateField(attachmentInput, false, 'attachmentError');
-        }
+  /* ---- Password toggle ---- */
+  document.querySelectorAll('.pw-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = document.getElementById(btn.dataset.target);
+      const isText = target.type === 'text';
+      target.type = isText ? 'password' : 'text';
+      btn.querySelector('svg').innerHTML = isText
+        ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
+        : '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
     });
+  });
 
-    // Real-time validation listeners
-    nameInput.addEventListener('input', () => validateName());
-    emailInput.addEventListener('input', () => validateEmail());
-    passwordInput.addEventListener('input', () => {
-        validatePassword();
-        checkPasswordStrength(passwordInput.value);
-        if (confirmPasswordInput.value) validateConfirmPassword();
+  /* ---- Password strength ---- */
+  const pwField = $('password');
+  const segs = [1, 2, 3, 4].map(n => $('seg' + n));
+  const strLabel = $('strength-label');
+  const colors = { 0: 'var(--border)', 1: 'var(--weak)', 2: 'var(--fair)', 3: 'var(--strong)', 4: 'var(--strong)' };
+  const labels = { 0: '', 1: 'Weak', 2: 'Fair', 3: 'Strong', 4: 'Very Strong' };
+
+  function getStrength(v) {
+    let s = 0;
+    if (v.length >= 8) s++;
+    if (/[A-Z]/.test(v)) s++;
+    if (/[0-9]/.test(v)) s++;
+    if (/[^A-Za-z0-9]/.test(v)) s++;
+    return s;
+  }
+
+  pwField.addEventListener('input', () => {
+    const v = pwField.value;
+    const s = v ? getStrength(v) : 0;
+    segs.forEach((seg, i) => {
+      seg.style.background = i < s ? colors[s] : 'var(--border)';
+      seg.style.transform = i < s ? 'scaleY(1.4)' : 'scaleY(1)';
     });
-    confirmPasswordInput.addEventListener('input', () => validateConfirmPassword());
-    mobileInput.addEventListener('input', () => validateMobile());
-    languageInput.addEventListener('change', () => validateLanguage());
-    
-    genderInputs.forEach(input => {
-        input.addEventListener('change', () => validateGender());
-    });
-    
-    termsInput.addEventListener('change', () => validateTerms());
+    strLabel.textContent = v ? labels[s] : '';
+    strLabel.style.color = colors[s];
+    validatePassword(false);
+  });
 
-    // Validation Functions
-    function showError(elementId, show) {
-        const errorEl = document.getElementById(elementId);
-        if (show) {
-            errorEl.style.display = 'block';
-        } else {
-            errorEl.style.display = 'none';
-        }
+  /* ---- Validators ---- */
+  function validateName(show_err = true) {
+    const el = $('name'), err = $('name-err'), v = el.value.trim();
+    if (!v) {
+      if (show_err) { setInvalid(el); show(err); } return false;
+    }
+    setValid(el); hide(err); return true;
+  }
+
+  function validateEmail(show_err = true) {
+    const el = $('email'), err = $('email-err'), v = el.value.trim();
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!v || !re.test(v)) {
+      if (show_err) { setInvalid(el); show(err); } return false;
+    }
+    setValid(el); hide(err); return true;
+  }
+
+  function validatePassword(show_err = true) {
+    const el = $('password'), err = $('password-err'), v = el.value;
+    if (v.length < 8) {
+      if (show_err) { setInvalid(el); show(err); } return false;
+    }
+    setValid(el); hide(err); return true;
+  }
+
+  function validateConfirm(show_err = true) {
+    const el = $('confirm'), err = $('confirm-err');
+    const v1 = $('password').value, v2 = el.value;
+    if (!v2 || v1 !== v2) {
+      if (show_err) { setInvalid(el); show(err); } return false;
+    }
+    setValid(el); hide(err); return true;
+  }
+
+  function validateMobile(show_err = true) {
+    const el = $('mobile'), err = $('mobile-err'), v = el.value.trim();
+    const re = /^\+?[\d\s\-().]{7,15}$/;
+    if (!v || !re.test(v)) {
+      if (show_err) { setInvalid(el); show(err); } return false;
+    }
+    setValid(el); hide(err); return true;
+  }
+
+  function validateLanguage(show_err = true) {
+    const el = $('language'), err = $('language-err');
+    if (!el.value) {
+      if (show_err) { setInvalid(el); show(err); } return false;
+    }
+    setValid(el); hide(err); return true;
+  }
+
+  function validateAttachment(show_err = true) {
+    const el = $('attachment'), err = $('attachment-err');
+    const lbl = $('fileLabelEl');
+    if (!el.files || !el.files.length) {
+      if (show_err) { lbl.classList.add('invalid'); show(err); } return false;
+    }
+    const allowed = ['jpg', 'jpeg', 'png', 'pdf', 'zip'];
+    const ext = el.files[0].name.split('.').pop().toLowerCase();
+    if (!allowed.includes(ext)) {
+      if (show_err) { lbl.classList.add('invalid'); show(err, 'Invalid file type. Use JPG, PNG, PDF or ZIP.'); } return false;
+    }
+    lbl.classList.remove('invalid'); hide(err); return true;
+  }
+
+  function validateGender(show_err = true) {
+    const err = $('gender-err');
+    const checked = document.querySelector('input[name="gender"]:checked');
+    if (!checked) {
+      if (show_err) show(err); return false;
+    }
+    hide(err); return true;
+  }
+
+  function validateTerms(show_err = true) {
+    const el = $('terms'), err = $('terms-err');
+    if (!el.checked) {
+      if (show_err) show(err); return false;
+    }
+    hide(err); return true;
+  }
+
+  /* ---- Real-time binding ---- */
+  $('name').addEventListener('input', () => validateName());
+  $('name').addEventListener('blur', () => validateName());
+  $('email').addEventListener('input', () => validateEmail());
+  $('email').addEventListener('blur', () => validateEmail());
+  $('confirm').addEventListener('input', () => validateConfirm());
+  $('mobile').addEventListener('input', () => validateMobile());
+  $('mobile').addEventListener('blur', () => validateMobile());
+  $('language').addEventListener('change', () => validateLanguage());
+  document.querySelectorAll('input[name="gender"]').forEach(r => r.addEventListener('change', () => validateGender()));
+  $('terms').addEventListener('change', () => validateTerms());
+
+  $('attachment').addEventListener('change', () => {
+    const el = $('attachment');
+    const lbl = $('fileLabelEl');
+    const txt = $('fileTextEl');
+    if (el.files && el.files.length) {
+      txt.textContent = el.files[0].name;
+      lbl.classList.add('has-file');
+    } else {
+      txt.textContent = 'Upload .JPG, .PNG, .PDF or .ZIP';
+      lbl.classList.remove('has-file');
+    }
+    validateAttachment();
+  });
+
+  /* ---- Toast ---- */
+  function showToast(msg) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3200);
+  }
+
+  /* ---- Submit ---- */
+  $('regForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const valid = [
+      validateName(), validateEmail(), validatePassword(), validateConfirm(),
+      validateMobile(), validateLanguage(), validateAttachment(),
+      validateGender(), validateTerms()
+    ].every(Boolean);
+
+    if (!valid) {
+      showToast('Please fix the errors before submitting.');
+      const firstInvalid = document.querySelector('.invalid, .error-msg.show');
+      if (firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
     }
 
-    function setValidationStatus(inputEl, isValid) {
-        if (isValid) {
-            inputEl.classList.remove('invalid');
-            inputEl.classList.add('valid');
-        } else {
-            inputEl.classList.remove('valid');
-            inputEl.classList.add('invalid');
-        }
-    }
+    const btn = $('submitBtn');
+    btn.textContent = 'Registering...';
+    btn.disabled = true;
 
-    function validateField(inputEl, condition, errorId) {
-        setValidationStatus(inputEl, condition);
-        showError(errorId, !condition);
-        return condition;
-    }
+    // Real form submission to the servlet
+    setTimeout(() => {
+      $('regForm').submit();
+    }, 1000);
+  });
 
-    function validateName() {
-        return validateField(nameInput, nameInput.value.trim() !== '', 'nameError');
-    }
-
-    function validateEmail() {
-        return validateField(emailInput, emailPattern.test(emailInput.value.trim()), 'emailError');
-    }
-
-    function validatePassword() {
-        return validateField(passwordInput, passwordInput.value.length >= 8, 'passwordError');
-    }
-
-    function validateConfirmPassword() {
-        const isValid = confirmPasswordInput.value === passwordInput.value && confirmPasswordInput.value.length > 0;
-        return validateField(confirmPasswordInput, isValid, 'confirmPasswordError');
-    }
-
-    function validateMobile() {
-        const digits = mobileInput.value.replace(/\D/g, '');
-        const isValid = digits.length >= 10 && phonePattern.test(mobileInput.value.trim());
-        return validateField(mobileInput, isValid, 'mobileError');
-    }
-
-    function validateLanguage() {
-        return validateField(languageInput, languageInput.value !== '', 'languageError');
-    }
-
-    function validateGender() {
-        const isChecked = Array.from(genderInputs).some(radio => radio.checked);
-        showError('genderError', !isChecked);
-        return isChecked;
-    }
-
-    function validateAttachment() {
-        const file = attachmentInput.files[0];
-        if (!file) {
-            showError('attachmentError', true);
-            return false;
-        }
-        const fileExt = file.name.split('.').pop().toLowerCase();
-        const allowedExts = ['jpg', 'jpeg', 'png', 'pdf', 'zip'];
-        const isValid = allowedExts.includes(fileExt);
-        showError('attachmentError', !isValid);
-        return isValid;
-    }
-
-    function validateTerms() {
-        showError('termsError', !termsInput.checked);
-        return termsInput.checked;
-    }
-
-    // Password Strength Indicator
-    function checkPasswordStrength(password) {
-        let strength = 0;
-        
-        if (password.length >= 8) strength += 1;
-        if (password.match(/[A-Z]/)) strength += 1;
-        if (password.match(/[0-9]/)) strength += 1;
-        if (password.match(/[^a-zA-Z0-9]/)) strength += 1;
-
-        switch(strength) {
-            case 0:
-            case 1:
-                strengthBar.style.width = '25%';
-                strengthBar.style.backgroundColor = 'var(--strength-weak)';
-                strengthText.textContent = 'Weak';
-                strengthText.style.color = 'var(--strength-weak)';
-                break;
-            case 2:
-                strengthBar.style.width = '50%';
-                strengthBar.style.backgroundColor = 'var(--strength-fair)';
-                strengthText.textContent = 'Fair';
-                strengthText.style.color = 'var(--strength-fair)';
-                break;
-            case 3:
-                strengthBar.style.width = '75%';
-                strengthBar.style.backgroundColor = 'var(--strength-good)';
-                strengthText.textContent = 'Good';
-                strengthText.style.color = 'var(--strength-good)';
-                break;
-            case 4:
-                strengthBar.style.width = '100%';
-                strengthBar.style.backgroundColor = 'var(--strength-strong)';
-                strengthText.textContent = 'Strong';
-                strengthText.style.color = 'var(--strength-strong)';
-                break;
-            default:
-                strengthBar.style.width = '0';
-                strengthText.textContent = '';
-        }
-        
-        if (password.length === 0) {
-            strengthBar.style.width = '0';
-            strengthText.textContent = '';
-        }
-    }
-
-    // Form Submission
-    form.addEventListener('submit', (e) => {
-        // Prevent default submission to handle validation
-        e.preventDefault();
-
-        // Trigger all validations
-        const isNameValid = validateName();
-        const isEmailValid = validateEmail();
-        const isPasswordValid = validatePassword();
-        const isConfirmPasswordValid = validateConfirmPassword();
-        const isMobileValid = validateMobile();
-        const isLanguageValid = validateLanguage();
-        const isGenderValid = validateGender();
-        const isAttachmentValid = validateAttachment();
-        const isTermsValid = validateTerms();
-
-        const isFormValid = isNameValid && isEmailValid && isPasswordValid && 
-                           isConfirmPasswordValid && isMobileValid && isLanguageValid && 
-                           isGenderValid && isAttachmentValid && isTermsValid;
-
-        if (isFormValid) {
-            // Animate button
-            const submitBtn = document.getElementById('submitBtn');
-            const originalContent = submitBtn.innerHTML;
-            
-            submitBtn.innerHTML = '<svg class="spinner" viewBox="0 0 50 50" style="width:20px;height:20px;animation:spin 1s linear infinite;"><circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" style="stroke-dasharray: 90, 150; stroke-dashoffset: 0;"></circle></svg> <span>Processing...</span>';
-            
-            if (!document.getElementById('spinStyle')) {
-                const style = document.createElement('style');
-                style.id = 'spinStyle';
-                style.textContent = '@keyframes spin { 100% { transform: rotate(360deg); } }';
-                document.head.appendChild(style);
-            }
-
-            // Simulate API call/Submission processing delay before actual form submission
-            setTimeout(() => {
-                submitBtn.style.backgroundColor = 'var(--success)';
-                submitBtn.innerHTML = '<svg xmlns="http://www.w3.org/2001/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> <span>Registration Successful!</span>';
-                
-                setTimeout(() => {
-                    form.submit(); // Actually submit to Java Backend
-                }, 1000);
-            }, 1500);
-        } else {
-            // Shake animation for the form to indicate errors
-            const wrapper = document.querySelector('.form-wrapper');
-            wrapper.classList.add('shake');
-            setTimeout(() => wrapper.classList.remove('shake'), 500);
-            
-            // Add shake animation if not exists
-            if (!document.getElementById('shakeStyle')) {
-                const style = document.createElement('style');
-                style.id = 'shakeStyle';
-                style.textContent = `
-                @keyframes shake {
-                    0%, 100% { transform: translateX(0); }
-                    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-                    20%, 40%, 60%, 80% { transform: translateX(5px); }
-                }
-                .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
-                `;
-                document.head.appendChild(style);
-            }
-            
-            // Scroll to the first error
-            const firstInvalid = document.querySelector('.invalid, .error-message[style*="display: block"]');
-            if (firstInvalid) {
-                firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        }
-    });
-});
+})();

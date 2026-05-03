@@ -37,6 +37,7 @@ public class RegisterServlet extends HttpServlet {
 
         String name = request.getParameter("name");
         String email = request.getParameter("email");
+        String password = request.getParameter("password");
         String mobile = request.getParameter("mobile");
         String language = request.getParameter("language");
         String gender = request.getParameter("gender");
@@ -57,6 +58,7 @@ public class RegisterServlet extends HttpServlet {
 
             Document userDoc = new Document("name", name)
                     .append("email", email)
+                    .append("password", password)
                     .append("mobile", mobile)
                     .append("language", language)
                     .append("gender", gender)
@@ -72,47 +74,36 @@ public class RegisterServlet extends HttpServlet {
 
         try (PrintWriter out = response.getWriter()) {
             out.println("<!DOCTYPE html>");
-            out.println("<html>");
+            out.println("<html lang='en'>");
             out.println("<head>");
-            out.println("<title>Registration Success</title>");
-            out.println("<style>");
-            out.println(
-                    "body { font-family: 'Inter', sans-serif; background: #f0f4ff; color: #1f2937; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }");
-            out.println(
-                    ".card { background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; max-width: 500px; width: 100%; }");
-            out.println("h1 { color: #10b981; }");
-            out.println(
-                    ".error-msg { color: #ef4444; background: #fef2f2; padding: 1rem; border-radius: 8px; margin-top: 1rem; text-align: left; font-size: 0.9rem; }");
-            out.println(
-                    "ul { text-align: left; background: #f9fafb; padding: 1rem 2rem; border-radius: 8px; list-style-type: none; }");
-            out.println("li { margin-bottom: 0.5rem; }");
-            out.println(
-                    "a { display: inline-block; margin-top: 1rem; color: white; background: #6366f1; text-decoration: none; padding: 0.75rem 1.5rem; border-radius: 8px; transition: background 0.3s; }");
-            out.println("a:hover { background: #4f46e5; }");
-            out.println("</style>");
+            out.println("<meta charset='UTF-8'>");
+            out.println("<meta name='viewport' content='width=device-width, initial-scale=1.0'>");
+            out.println("<title>Registration Result</title>");
+            out.println("<link href='https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=DM+Sans:wght@300;400;500&display=swap' rel='stylesheet'>");
+            out.println("<link rel='stylesheet' href='css/style.css'>");
             out.println("</head>");
             out.println("<body>");
             out.println("<div class='card'>");
-
+            
             if (dbSuccess) {
-                out.println("<h1>Registration Successful!</h1>");
-                out.println("<p>Thank you for registering. Your details have been saved to MongoDB.</p>");
+                out.println("<h1 class='result-h1-success'>Successful</h1>");
+                out.println("<p>Your registration has been processed and saved securely.</p>");
             } else {
-                out.println("<h1 style='color: #ef4444;'>Registration Partially Successful</h1>");
-                out.println("<p>We received your request, but failed to save it to the database.</p>");
-                out.println("<div class='error-msg'><strong>MongoDB Error:</strong><br>" + dbError
-                        + "<br><br><em>(Did you remember to update the MONGODB_URI in RegisterServlet.java?)</em></div>");
+                out.println("<h1 class='result-h1-error'>Partially Successful</h1>");
+                out.println("<p>We received your request, but encountered a database error.</p>");
+                out.println("<div class='error-box'><strong>MongoDB Error:</strong><br>" + dbError + "</div>");
             }
 
-            out.println("<ul>");
-            out.println("<li><strong>Name:</strong> " + name + "</li>");
-            out.println("<li><strong>Email:</strong> " + email + "</li>");
-            out.println("<li><strong>Mobile:</strong> " + mobile + "</li>");
-            out.println("<li><strong>Language:</strong> " + language + "</li>");
-            out.println("<li><strong>Gender:</strong> " + gender + "</li>");
-            out.println("<li><strong>Attachment:</strong> " + fileName + "</li>");
-            out.println("</ul>");
-            out.println("<a href='index.html'>Back to Home</a>");
+            out.println("<div class='details'>");
+            out.println("<div class='detail-row'><span class='detail-label'>Name</span><span class='detail-value'>" + name + "</span></div>");
+            out.println("<div class='detail-row'><span class='detail-label'>Email</span><span class='detail-value'>" + email + "</span></div>");
+            out.println("<div class='detail-row'><span class='detail-label'>Mobile</span><span class='detail-value'>" + mobile + "</span></div>");
+            out.println("<div class='detail-row'><span class='detail-label'>Language</span><span class='detail-value'>" + language + "</span></div>");
+            out.println("<div class='detail-row'><span class='detail-label'>Gender</span><span class='detail-value'>" + gender + "</span></div>");
+            out.println("<div class='detail-row'><span class='detail-label'>File</span><span class='detail-value'>" + fileName + "</span></div>");
+            out.println("</div>");
+            
+            out.println("<a href='index.html' class='btn-back'>Back to Home</a>");
             out.println("</div>");
             out.println("</body>");
             out.println("</html>");
