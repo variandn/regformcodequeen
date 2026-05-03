@@ -1,4 +1,4 @@
-# Premium Registration Form
+# Premium Feel Registration Form
 
 A modern, responsive, and aesthetically pleasing registration form built with HTML5, CSS3, JavaScript, and Java Servlets.
 
@@ -11,13 +11,20 @@ A modern, responsive, and aesthetically pleasing registration form built with HT
 - **Java Servlet Backend**: A sample servlet ready to handle the multipart form-data submission and echo back the results in a success page.
 
 ## Result Screenshot
-![Registration Form Demo](images/demo.png)
+![Registration Form Demo](images/final form.png)
+##other form screenshoot
 
+![Registration Form Demo](images/responsiveness to small screens.png)
+![Registration Form Demo](images/successfull registration message.png)
+![Registration Form Demo](images/adding profile.png)
 ## Tech Stack
 - Frontend: HTML5, CSS3, JavaScript
 - Backend: Java Servlets (Java EE), Maven
 
 ## Steps to Run the Project
+view it on render https://regformcodequeen.onrender.com/index.html
+
+OR
 
 1. **Clone the repository:**
    ```bash
@@ -39,6 +46,8 @@ A modern, responsive, and aesthetically pleasing registration form built with HT
      http://localhost:8080/registration-form/index.html
      ```
      *(The URL context path depends on how you configure your server)*
+     
+     
 
 ## Database Configuration
 
